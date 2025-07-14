@@ -20,6 +20,12 @@ class App(ctk.CTk):
         # Entry field
         EntryField(self)
 
+        # QR code
+        raw_image = Image.open("placeholder.png").resize((200, 200))
+        image_tk = ImageTk.PhotoImage(raw_image)
+        self.qr_code = QrImage(self)
+        self.qr_code.update_image(image_tk)
+
         # Run
         self.mainloop()
 
@@ -50,6 +56,18 @@ class EntryField(ctk.CTkFrame):
             self.frame, text="Save", fg_color="#2e54e8", hover_color="#4266f1"
         )
         button.grid(row=0, column=2, sticky="nsew", padx=10)
+
+
+class QrImage(tk.Canvas):
+    def __init__(self, parent):
+        super().__init__(
+            master=parent, background="red", bd=0, highlightthickness=0, relief="ridge"
+        )
+
+        self.place(relx=0.5, rely=0.4, width=200, height=200, anchor="center")
+
+    def update_image(self, image_tk):
+        self.create_image(0, 0, image=image_tk, anchor="nw")
 
 
 App()
