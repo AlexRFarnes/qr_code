@@ -3,6 +3,7 @@
 import tkinter as tk
 
 import customtkinter as ctk
+import qrcode
 from PIL import Image, ImageTk
 
 
@@ -18,20 +19,28 @@ class App(ctk.CTk):
         self.iconbitmap("empty.ico")
 
         # Entry field
-        EntryField(self)
+        self.entry_string = ctk.StringVar()
+        self.entry_string.trace_add("write", self.create_qr)
+        EntryField(self, self.entry_string)
 
         # QR code
-        raw_image = Image.open("placeholder.png").resize((200, 200))
-        image_tk = ImageTk.PhotoImage(raw_image)
-        self.qr_code = QrImage(self)
-        self.qr_code.update_image(image_tk)
+        self.qr_image = QrImage(self)
 
         # Run
         self.mainloop()
 
+    def create_qr(self, *args):
+        current_text = self.entry_string.get()
+        if current_text:
+            self.raw_image = qrcode.make(current_text).resize((300, 300))
+            self.image_tk = ImageTk.PhotoImage(self.raw_image)
+            self.qr_image.update_image(self.image_tk)
+        else:
+            self.qr_image.clear()
+
 
 class EntryField(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, entry_string):
         super().__init__(master=parent, corner_radius=20, fg_color="#021fb3")
         self.place(relx=0.5, rely=1, relwidth=1, relheight=0.4, anchor="center")
 
@@ -50,7 +59,11 @@ class EntryField(ctk.CTkFrame):
 
         # Widgets
         entry = ctk.CTkEntry(
-            self.frame, fg_color="#2e54e8", border_width=0, text_color="#ffffff"
+            self.frame,
+            fg_color="#2e54e8",
+            border_width=0,
+            text_color="#ffffff",
+            textvariable=entry_string,
         )
         entry.grid(row=0, column=1, sticky="nsew")
 
@@ -62,11 +75,21 @@ class EntryField(ctk.CTkFrame):
 
 class QrImage(tk.Canvas):
     def __init__(self, parent):
-        super().__init__(master=parent, bd=0, highlightthickness=0, relief="ridge")
-        self.place(relx=0.5, rely=0.4, width=200, height=200, anchor="center")
+        super().__init__(
+            master=parent,
+            background="#ffffff",
+            bd=0,
+            highlightthickness=0,
+            relief="ridge",
+        )
+        self.place(relx=0.5, rely=0.4, width=300, height=300, anchor="center")
 
     def update_image(self, image_tk):
+        self.clear()
         self.create_image(0, 0, image=image_tk, anchor="nw")
+
+    def clear(self):
+        self.delete("all")
 
 
 App()
