@@ -1,10 +1,16 @@
 # qr_generator.py
 
 import tkinter as tk
+from tkinter import filedialog
 
 import customtkinter as ctk
 import qrcode
 from PIL import Image, ImageTk
+
+try:
+    from ctypes import byref, c_int, sizeof, windll
+except:
+    pass
 
 
 class App(ctk.CTk):
@@ -12,6 +18,12 @@ class App(ctk.CTk):
         # Window setup
         ctk.set_appearance_mode("light")
         super().__init__(fg_color="white")
+
+        self.title_bar_color()
+
+        # Initialization
+        self.raw_image = None
+        self.image_tk = None
 
         # Customization
         self.title("")
@@ -21,10 +33,13 @@ class App(ctk.CTk):
         # Entry field
         self.entry_string = ctk.StringVar()
         self.entry_string.trace_add("write", self.create_qr)
-        EntryField(self, self.entry_string)
+        EntryField(self, self.entry_string, self.save)
 
         # QR code
         self.qr_image = QrImage(self)
+
+        # Enter key event
+        self.bind("<Return>", self.save)
 
         # Run
         self.mainloop()
@@ -37,10 +52,27 @@ class App(ctk.CTk):
             self.qr_image.update_image(self.image_tk)
         else:
             self.qr_image.clear()
+            self.raw_image = None
+            self.image_tk = None
+
+    def save(self, event=""):
+        if self.raw_image:
+            filepath = filedialog.asksaveasfilename()
+            if filepath:
+                self.raw_image.save(filepath + ".png")
+
+    def title_bar_color(self):
+        try:
+            HWND = windll.user32.GetParent(self.winfo_id())
+            windll.dwmapi.DwmSetWindowAttribute(
+                HWND, 35, byref(c_int(0x00FFFFFF)), sizeof(c_int)
+            )
+        except:
+            pass
 
 
 class EntryField(ctk.CTkFrame):
-    def __init__(self, parent, entry_string):
+    def __init__(self, parent, entry_string, save_func):
         super().__init__(master=parent, corner_radius=20, fg_color="#021fb3")
         self.place(relx=0.5, rely=1, relwidth=1, relheight=0.4, anchor="center")
 
@@ -68,7 +100,11 @@ class EntryField(ctk.CTkFrame):
         entry.grid(row=0, column=1, sticky="nsew")
 
         button = ctk.CTkButton(
-            self.frame, text="Save", fg_color="#2e54e8", hover_color="#4266f1"
+            self.frame,
+            text="Save",
+            fg_color="#2e54e8",
+            hover_color="#4266f1",
+            command=save_func,
         )
         button.grid(row=0, column=2, sticky="nsew", padx=10)
 
