@@ -39,14 +39,16 @@ class EntryField(ctk.CTkFrame):
         self.rowconfigure((0, 1), weight=1, uniform="a")
         self.columnconfigure(0, weight=1, uniform="a")
 
-        # Widgets
+        # Sub Frame
         self.frame = ctk.CTkFrame(self, fg_color="transparent")
+        # Sub grid layout
         self.frame.columnconfigure(0, weight=1, uniform="b")
         self.frame.columnconfigure(1, weight=4, uniform="b")
         self.frame.columnconfigure(2, weight=2, uniform="b")
         self.frame.columnconfigure(3, weight=1, uniform="b")
         self.frame.grid(row=0, column=0)
 
+        # Widgets
         entry = ctk.CTkEntry(
             self.frame, fg_color="#2e54e8", border_width=0, text_color="#ffffff"
         )
@@ -60,10 +62,7 @@ class EntryField(ctk.CTkFrame):
 
 class QrImage(tk.Canvas):
     def __init__(self, parent):
-        super().__init__(
-            master=parent, background="red", bd=0, highlightthickness=0, relief="ridge"
-        )
-
+        super().__init__(master=parent, bd=0, highlightthickness=0, relief="ridge")
         self.place(relx=0.5, rely=0.4, width=200, height=200, anchor="center")
 
     def update_image(self, image_tk):
